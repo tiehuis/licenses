@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+set -e
+
+i='index.html'
+archive='all.tar'
+
+rm -f $i "licenses/$archive.gz"
+
+echo '<!doctype html>'            >> $i
+echo '<html lang="en">'           >> $i
+echo '<head>'                     >> $i
+echo '  <meta charset="utf-8">'   >> $i
+echo '  <meta name="description" content="software license archive">' >> $i
+echo '  <meta name="author" content="Marc Tiehuis">' >> $i
+echo '</head>'                    >> $i
+echo '<body>'                     >> $i
+echo '<pre>'                      >> $i
+
+echo "  <a href=\"/licenses/$archive.gz\">all licenses</a><br>" >> $i
+for file in licenses/*; do
+    echo "  <a href=\"/$file\">$(basename $file)</a>" >> $i
+done
+
+cd licenses
+tar -cf $archive *
+gzip --best $archive
+cd ..
+
+echo '</pre>'                     >> $i
+echo '</body>'                    >> $i
+echo '</html>'                    >> $i
