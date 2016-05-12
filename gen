@@ -5,7 +5,7 @@ set -e
 i='index.html'
 archive='all.tar'
 
-rm -f $i "licenses/$archive.gz"
+rm -f $i "@/$archive.gz"
 
 echo '<!doctype html>'            >> $i
 echo '<html lang="en">'           >> $i
@@ -17,12 +17,12 @@ echo '</head>'                    >> $i
 echo '<body>'                     >> $i
 echo '<pre>'                      >> $i
 
-echo "  <a href=\"/licenses/$archive.gz\">all licenses</a><br>" >> $i
-for file in licenses/*; do
-    echo "  <a href=\"/$file\">$(basename $file)</a>" >> $i
+echo "  <a href=\"@/$archive.gz\">all licenses</a><br>" >> $i
+for file in @/*; do
+    echo "  <a href=\"$file\">$(basename $file)</a>" >> $i
 done
 
-cd licenses
+cd '@'
 tar -cf $archive *
 gzip --best $archive
 cd ..
