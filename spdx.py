@@ -1,0 +1,92 @@
+# Cross reference current licenses and headers with the spdx listings
+#
+# This can also be used to scrape all license and header info from spdx, but
+# the resulting format is usually not desirable.
+#
+# Since this is a one-off, these are sourced from other locations where
+# available.
+
+import errno
+import os
+import sys
+import gzip
+import bs4
+import requests
+
+SCRAPE = False
+URL = 'http://spdx.org/licenses'
+
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+
+def read_license_single(tr):
+    # Determine the name and page with license content
+    path = tr.find('td').find('a').attrs['href']
+    license_name = tr.find('code').text
+
+    r = requests.get(URL + path[1::])
+    content = gzip.decompress(r.content)
+    soup = bs4.BeautifulSoup(content, 'html.parser')
+
+    license_text = soup.find('div', {'property': 'spdx:licenseText'}).get_text()
+
+    license_header = soup.find('div', {'property': 'spdx:standardLicenseHeader'}).get_text()
+    if 'There is no standard license header for the license' in license_header:
+        license_header = None
+
+    if SCRAPE:
+        if license_text:
+            with open('t/' + license_name, 'w') as fd:
+                fd.write(license_text)
+        if license_header:
+            with open('h/' + license_name, 'w') as fd:
+                fd.write(license_header)
+    else:
+        if license_text:
+            if not os.path.exists('t/' + license_name):
+                print("\033[31m[T]\033[0m ", end="")
+            else:
+                print("\033[32m[T]\033[0m ", end="")
+        else:
+            print("   ", end="")
+
+        if license_header:
+            if not os.path.exists('h/' + license_name):
+                print("\033[31m[H]\033[0m", end="")
+            else:
+                print("\033[32m[H]\033[0m", end="")
+        else:
+            print("   ", end="")
+
+        print(" - ", end="")
+
+    print(license_name)
+
+
+def read_license_index():
+    # Requests will not decode gzip response by default
+    r = requests.get(URL)
+    content = gzip.decompress(r.content)
+
+    soup = bs4.BeautifulSoup(content, 'html.parser')
+
+    for tr in soup.find_all('tr'):
+        if tr.find('td', {'typeof': 'spdx:License'}):
+            read_license_single(tr)
+
+if __name__ == "__main__":
+    if SCRAPE:
+        s = input("This will likely overwrite all files in 'h' and 't' directories!\n" +
+                  "Continue? (N/y) ")
+
+        if s != 'y' and s != 'Y':
+            sys.exit(0)
+
+        mkdir_p('h')
+        mkdir_p('t')
+
+    read_license_index()

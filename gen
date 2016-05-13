@@ -3,9 +3,9 @@
 set -e
 
 i='index.html'
-archive='all.tar'
-
-rm -f $i "@/$archive.gz"
+rm -f $i
+rm -f a/*
+rm -f */"$i"
 
 echo '<!doctype html>'            >> $i
 echo '<html lang="en">'           >> $i
@@ -17,15 +17,70 @@ echo '</head>'                    >> $i
 echo '<body>'                     >> $i
 echo '<pre>'                      >> $i
 
-echo "  <a href=\"@/$archive.gz\">all licenses</a><br>" >> $i
-for file in @/*; do
+tar -cf all.tar h t r e
+gzip --best all.tar
+mv all.tar.gz a/all.tar.gz
+
+cd h
+tar -cf header.tar *
+gzip --best header.tar
+mv header.tar.gz ../a/header.tar.gz
+cd ..
+
+cd e
+tar -cf exception.tar *
+gzip --best exception.tar
+mv exception.tar.gz ../a/exception.tar.gz
+cd ..
+
+cd t
+tar -cf license.tar *
+gzip --best license.tar
+mv license.tar.gz ../a/license.tar.gz
+cd ..
+
+cd r
+tar -cf readme.tar *
+gzip --best readme.tar
+mv readme.tar.gz ../a/readme.tar.gz
+cd ..
+
+echo '<h4>Archives</h4>'          >> $i
+for file in a/*; do
     echo "  <a href=\"$file\">$(basename $file)</a>" >> $i
 done
 
-cd '@'
-tar -cf $archive *
-gzip --best $archive
-cd ..
+echo '<h4>Licenses</h4>'          >> $i
+for file in t/*; do
+    echo "  <a href=\"$file\">$(basename $file)</a>" >> $i
+done
+
+echo '<h4>Headers</h4>'           >> $i
+for file in h/*; do
+    echo "  <a href=\"$file\">$(basename $file)</a>" >> $i
+done
+
+echo '<h4>Readme</h4>'           >> $i
+for file in r/*; do
+    echo "  <a href=\"$file\">$(basename $file)</a>" >> $i
+done
+
+# Funnily enough, one cannot just run `ls a > a/index.html`, as this will
+# include index.html in the listings, as these are not evaluated in sync.
+ls a > temp-index.html
+mv temp-index.html a/index.html
+
+ls e > temp-index.html
+mv temp-index.html e/index.html
+
+ls h > temp-index.html
+mv temp-index.html h/index.html
+
+ls t > temp-index.html
+mv temp-index.html t/index.html
+
+ls r > temp-index.html
+mv temp-index.html r/index.html
 
 echo '</pre>'                     >> $i
 echo '</body>'                    >> $i

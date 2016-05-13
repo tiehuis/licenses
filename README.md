@@ -1,9 +1,27 @@
 # licenses
 
-An archive of plaintext licenses which can be easily retrieved via some tool
-such as wget.
+An archive of most `spdx` licenses with correct formatting with properly
+marked fields.
 
-See [the site](https://tiehuis.github.io/licenses) for details.
+All licenses may be formatted with special templated code which can be
+autopopulated by tools using these. The format is the same as that of
+`choosealicense`.
+
+`[fullname]`, `[login]`, `[email]`, `[project]`, `[description]`, `[year]`
+
+# Structure
+
+### h
+Stores header information
+
+### a
+Stores compiled archives
+
+### t
+Stores actual license text
+
+## r
+Stores generic license readme excerpts
 
 # Usage
 
@@ -20,13 +38,6 @@ function license {
         output="$2"
     fi
 
-    wget "https://tiehuis.github.io/licenses/@/$1" -nv -O "$output"
+    wget "https://tiehuis.github.io/licenses/t/$1" -nv -O "$output"
 }
 ```
-
-# Format
-
-All licenses have project-specific values enclosed in `[]`. The format is
-similar to that of [choosealicense](https://github.com/github/choosealicense.com).
-
-Any post-processing can always assume these rules for all present licenses.
