@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Cross reference current licenses and headers with the spdx listings
 #
 # This can also be used to scrape all license and header info from spdx, but
